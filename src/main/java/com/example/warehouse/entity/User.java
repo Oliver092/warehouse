@@ -1,6 +1,5 @@
 package com.example.warehouse.entity;
 
-import com.example.warehouse.dto.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

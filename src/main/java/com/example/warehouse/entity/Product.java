@@ -21,6 +21,10 @@ public class Product {
 
     private Integer quantity;
 
+    private Integer reorderThreshold; // alert when quantity falls below this
+
+    private Integer maxQuantity;
+
     @ManyToOne
     @JoinColumn(name = "shelf_id")
     private Shelf shelf;

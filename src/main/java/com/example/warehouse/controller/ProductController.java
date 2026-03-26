@@ -42,4 +42,24 @@ public class ProductController {
             @PathVariable Long shelfId) {
         return ResponseEntity.ok(productService.assignToShelf(id, shelfId));
     }
+
+    @PatchMapping("/{id}/move/{shelfId}")
+    public ResponseEntity<ProductDTO> moveToShelf(
+            @PathVariable Long id,
+            @PathVariable Long shelfId) {
+        return ResponseEntity.ok(productService.moveToShelf(id, shelfId));
+    }
+
+    @PatchMapping("/{id}/quantity")
+    public ResponseEntity<ProductDTO> updateQuantity(
+            @PathVariable Long id,
+            @RequestParam int change) {
+        return ResponseEntity.ok(productService.updateQuantity(id, change));
+    }
+
+    // Get all low stock products - managers can monitor this
+    @GetMapping("/low-stock")
+    public List<ProductDTO> getLowStock() {
+        return productService.getLowStockProducts();
+    }
 }

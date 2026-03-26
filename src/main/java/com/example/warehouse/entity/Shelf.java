@@ -17,8 +17,7 @@ public class Shelf {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String code; // e.g. "S2-B" (shelf 2, level B)
+    private String code; // e.g. "S2-B" (shelf 2, level B) - possible change, depending on business logic
 
     private Integer maxCapacity;
 
@@ -28,4 +27,10 @@ public class Shelf {
 
     @OneToMany(mappedBy = "shelf", cascade = CascadeType.ALL)
     private List<Product> products = new ArrayList<>();
+
+    public int getCurrentLoad() {
+        return products.stream()
+                .mapToInt(p -> p.getQuantity() != null ? p.getQuantity() : 0)
+                .sum();
+    }
 }

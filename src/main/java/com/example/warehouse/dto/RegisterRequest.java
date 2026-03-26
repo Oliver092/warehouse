@@ -1,5 +1,6 @@
 package com.example.warehouse.dto;
 
+import com.example.warehouse.entity.Role;
 import lombok.Data;
 
 @Data

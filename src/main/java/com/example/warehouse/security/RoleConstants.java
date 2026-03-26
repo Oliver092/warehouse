@@ -1,4 +1,4 @@
-package com.example.warehouse.dto;
+package com.example.warehouse.security;
 
 public class RoleConstants {
     public static final String ADMIN = "hasRole('ROLE_ADMIN')";

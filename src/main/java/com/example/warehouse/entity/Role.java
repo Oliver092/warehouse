@@ -1,4 +1,4 @@
-package com.example.warehouse.dto;
+package com.example.warehouse.entity;
 
 public enum Role {
     ROLE_ADMIN,        // full access, system config

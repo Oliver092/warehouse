@@ -36,10 +36,16 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole(
                                 "ADMIN", "MANAGER", "WORKER", "READONLY")
+                        .requestMatchers(HttpMethod.GET, "/api/products/low-stock").hasAnyRole(
+                                "ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAnyRole(
                                 "ADMIN", "MANAGER", "WORKER")
                         .requestMatchers(HttpMethod.POST, "/api/products/**").hasAnyRole(
                                 "ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/products/**").hasAnyRole(
+                                "ADMIN", "MANAGER", "WORKER")
+                        .requestMatchers(HttpMethod.PATCH, "/api/products/*/quantity").hasAnyRole(
+                                "ADMIN", "MANAGER", "WORKER")
                         .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAnyRole(
                                 "ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.POST, "/api/halls/**").hasRole("ADMIN")
