@@ -15,6 +15,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ShelfService shelfService;
+    private final ProductSearchService productSearchService;
 
     public List<ProductDTO> getAll() {
         return productRepository.findAll().stream()
@@ -62,11 +63,14 @@ public class ProductService {
         }
 
         product.setShelf(shelf);
-        return toDTO(productRepository.save(product));
+        Product saved = productRepository.save(product);
+        productSearchService.indexProduct(saved);
+        return toDTO(saved);
     }
 
     public void delete(Long id) {
         productRepository.deleteById(id);
+        productSearchService.deleteFromIndex(id);
     }
 
     public Product findById(Long id) {
@@ -133,6 +137,7 @@ public class ProductService {
 
         product.setQuantity(newQuantity);
         Product saved = productRepository.save(product);
+        productSearchService.indexProduct(saved);
 
         // Check reorder threshold after update
         if (saved.getReorderThreshold() != null &&
@@ -155,6 +160,11 @@ public class ProductService {
                         p.getQuantity() <= p.getReorderThreshold())
                 .map(this::toDTO)
                 .toList();
+    }
+
+    public void reindexAll() {
+        List<Product> all = productRepository.findAll();
+        productSearchService.reindexAll(all);
     }
 
     private ProductDTO toDTO(Product product) {

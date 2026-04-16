@@ -2,6 +2,8 @@ package com.example.warehouse.controller;
 
 import com.example.warehouse.dto.ProductDTO;
 import com.example.warehouse.entity.Product;
+import com.example.warehouse.entity.ProductDocument;
+import com.example.warehouse.service.ProductSearchService;
 import com.example.warehouse.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,8 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+
+    private final ProductSearchService productSearchService;
 
     @GetMapping
     public List<ProductDTO> getAll() {
@@ -61,5 +65,21 @@ public class ProductController {
     @GetMapping("/low-stock")
     public List<ProductDTO> getLowStock() {
         return productService.getLowStockProducts();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductDocument>> search(@RequestParam String q) {
+        return ResponseEntity.ok(productSearchService.search(q));
+    }
+
+    @GetMapping("/search/fuzzy")
+    public ResponseEntity<List<ProductDocument>> fuzzySearch(@RequestParam String q) {
+        return ResponseEntity.ok(productSearchService.fuzzySearch(q));
+    }
+
+    @PostMapping("/reindex")
+    public ResponseEntity<String> reindex() {
+        productService.reindexAll();
+        return ResponseEntity.ok("Reindex triggered successfully");
     }
 }
