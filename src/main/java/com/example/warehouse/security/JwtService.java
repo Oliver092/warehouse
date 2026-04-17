@@ -53,4 +53,8 @@ public class JwtService {
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(Hex.decode(SECRET_KEY));
     }
+
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
 }

@@ -35,9 +35,9 @@ public class ProductDocument {
     @Field(type = FieldType.Keyword)
     private String shelfCode;
 
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Keyword)
     private String aisleName;
 
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Keyword)
     private String hallName;
 }

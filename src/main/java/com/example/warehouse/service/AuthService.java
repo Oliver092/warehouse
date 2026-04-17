@@ -44,12 +44,12 @@ public class AuthService {
         return jwtService.generateToken(user);
     }
 
-    public String logout(String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new RuntimeException("No token provided");
+    public void logout(String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            long expiration = jwtService.extractExpiration(token).getTime()
+                    - System.currentTimeMillis();
+            tokenBlacklist.blacklist(token, expiration);
         }
-        String token = authHeader.substring(7);
-        tokenBlacklist.blacklist(token);
-        return "Logged out successfully";
     }
 }

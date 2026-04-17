@@ -34,10 +34,16 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/products/low-stock").hasAnyRole("ADMIN", "MANAGER")
-                        .requestMatchers(HttpMethod.GET, "/api/products/search").hasAnyRole("ADMIN", "MANAGER", "WORKER", "READONLY")
-                        .requestMatchers(HttpMethod.GET, "/api/products/search/fuzzy").hasAnyRole("ADMIN", "MANAGER", "WORKER", "READONLY")
-                        .requestMatchers(HttpMethod.POST, "/api/products/reindex").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/products/low-stock")
+                        .hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/api/products/search")
+                        .hasAnyRole("ADMIN", "MANAGER", "WORKER", "READONLY")
+                        .requestMatchers(HttpMethod.GET, "/api/products/search/fuzzy")
+                        .hasAnyRole("ADMIN", "MANAGER", "WORKER", "READONLY")
+                        .requestMatchers(HttpMethod.POST, "/api/products/reindex")
+                        .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/products/statistics")
+                        .hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole(
                                 "ADMIN", "MANAGER", "WORKER", "READONLY")
                         .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAnyRole(

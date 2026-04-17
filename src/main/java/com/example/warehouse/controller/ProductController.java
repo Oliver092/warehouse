@@ -1,5 +1,6 @@
 package com.example.warehouse.controller;
 
+import co.elastic.clients.elasticsearch._types.FieldValue;
 import com.example.warehouse.dto.ProductDTO;
 import com.example.warehouse.entity.Product;
 import com.example.warehouse.entity.ProductDocument;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/products")
@@ -81,5 +83,10 @@ public class ProductController {
     public ResponseEntity<String> reindex() {
         productService.reindexAll();
         return ResponseEntity.ok("Reindex triggered successfully");
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<Map<String, Long>> getStatistics() {
+        return ResponseEntity.ok(productSearchService.getStatisticsByHall());
     }
 }

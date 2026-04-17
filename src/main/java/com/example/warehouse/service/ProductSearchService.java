@@ -1,9 +1,13 @@
 package com.example.warehouse.service;
 
+import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
+import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 import com.example.warehouse.entity.Product;
 import com.example.warehouse.entity.ProductDocument;
 import com.example.warehouse.repository.ProductSearchRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -12,6 +16,8 @@ import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -59,6 +65,36 @@ public class ProductSearchService {
         return hits.stream()
                 .map(SearchHit::getContent)
                 .toList();
+    }
+
+    public Map<String, Long> getStatisticsByHall() {
+        Query query = NativeQuery.builder()
+                .withAggregation("hall_statistics", Aggregation.of(a -> a
+                        .terms(t -> t.field("hallName"))
+                ))
+                .withMaxResults(0)
+                .build();
+
+        SearchHits<ProductDocument> hits =
+                elasticsearchOperations.search(query, ProductDocument.class);
+
+        ElasticsearchAggregations aggregations =
+                (ElasticsearchAggregations) hits.getAggregations();
+
+        assert aggregations != null;
+        return aggregations
+                .aggregationsAsMap()
+                .get("hall_statistics")
+                .aggregation()
+                .getAggregate()
+                .sterms()
+                .buckets()
+                .array()
+                .stream()
+                .collect(Collectors.toMap(
+                        bucket -> bucket.key().stringValue(), // FieldValue → String
+                        StringTermsBucket::docCount
+                ));
     }
 
     private ProductDocument toDocument(Product product) {
