@@ -1,9 +1,13 @@
 package com.example.warehouse.service;
 
+import com.example.warehouse.controller.AuthController;
 import com.example.warehouse.dto.LoginRequest;
 import com.example.warehouse.dto.RegisterRequest;
 import com.example.warehouse.entity.Role;
 import com.example.warehouse.entity.User;
+import com.example.warehouse.exception.DuplicateResourceException;
+import com.example.warehouse.exception.InvalidOperationException;
+import com.example.warehouse.exception.ResourceNotFoundException;
 import com.example.warehouse.repository.UserRepository;
 import com.example.warehouse.security.JwtService;
 import com.example.warehouse.security.TokenBlacklist;
@@ -25,7 +29,7 @@ public class AuthService {
 
     public String register(RegisterRequest request) {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new RuntimeException("Username already exists");
+            throw new DuplicateResourceException("Username already exists");
         }
         User user = new User();
         user.setUsername(request.getUsername());
@@ -40,7 +44,7 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(), request.getPassword()));
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new InvalidOperationException("Invalid credentials"));
         return jwtService.generateToken(user);
     }
 

@@ -1,6 +1,5 @@
 package com.example.warehouse.service;
 
-import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
 import com.example.warehouse.entity.Product;

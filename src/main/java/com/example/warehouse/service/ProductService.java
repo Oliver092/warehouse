@@ -3,12 +3,18 @@ package com.example.warehouse.service;
 import com.example.warehouse.dto.ProductDTO;
 import com.example.warehouse.entity.Product;
 import com.example.warehouse.entity.Shelf;
+import com.example.warehouse.exception.InvalidOperationException;
+import com.example.warehouse.exception.ResourceNotFoundException;
+import com.example.warehouse.exception.ShelfCapacityExceededException;
+import com.example.warehouse.exception.SkuConflictException;
 import com.example.warehouse.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -35,10 +41,7 @@ public class ProductService {
             int currentLoad = shelf.getCurrentLoad();
             int incoming = product.getQuantity() != null ? product.getQuantity() : 0;
             if (currentLoad + incoming > shelf.getMaxCapacity()) {
-                throw new RuntimeException(
-                        "Shelf " + shelf.getCode() + " capacity exceeded. " +
-                                "Available space: " + (shelf.getMaxCapacity() - currentLoad)
-                );
+                throw new ShelfCapacityExceededException(shelf.getCode(), shelf.getMaxCapacity() - currentLoad);
             }
         }
 
@@ -46,10 +49,7 @@ public class ProductService {
         if (!shelf.getProducts().isEmpty()) {
             String existingSku = shelf.getProducts().get(0).getSku();
             if (existingSku != null && !existingSku.equals(product.getSku())) {
-                throw new RuntimeException(
-                        "Shelf " + shelf.getCode() + " already contains SKU: "
-                                + existingSku + ". Cannot mix SKUs on the same shelf."
-                );
+                throw new SkuConflictException(shelf.getCode(), existingSku);
             }
 
             // Same SKU - just add to quantity instead of creating new entry
@@ -64,7 +64,12 @@ public class ProductService {
 
         product.setShelf(shelf);
         Product saved = productRepository.save(product);
-        productSearchService.indexProduct(saved);
+        try {
+            productSearchService.indexProduct(saved);
+        } catch (Exception e) {
+            log.warn("Failed to index product {} in Elasticsearch: {}",
+                    saved.getId(), e.getMessage());
+        }
         return toDTO(saved);
     }
 
@@ -75,7 +80,7 @@ public class ProductService {
 
     public Product findById(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product", id));
     }
 
     public ProductDTO assignToShelf(Long productId, Long shelfId) {
@@ -92,19 +97,14 @@ public class ProductService {
         // Already on this shelf
         if (product.getShelf() != null &&
                 product.getShelf().getId().equals(newShelfId)) {
-            throw new RuntimeException(
-                    "Product is already on shelf: " + newShelf.getCode()
-            );
+            throw new InvalidOperationException("Product is already on shelf: " + newShelf.getCode());
         }
 
         // Check SKU conflict
         if (!newShelf.getProducts().isEmpty()) {
             String existingSku = newShelf.getProducts().get(0).getSku();
             if (existingSku != null && !existingSku.equals(product.getSku())) {
-                throw new RuntimeException(
-                        "Cannot move to shelf " + newShelf.getCode() +
-                                " — already contains different SKU: " + existingSku
-                );
+                throw new SkuConflictException(newShelf.getCode(), existingSku);
             }
         }
 
@@ -113,10 +113,7 @@ public class ProductService {
             int currentLoad = newShelf.getCurrentLoad();
             int incoming = product.getQuantity() != null ? product.getQuantity() : 0;
             if (currentLoad + incoming > newShelf.getMaxCapacity()) {
-                throw new RuntimeException(
-                        "Shelf " + newShelf.getCode() + " capacity exceeded. " +
-                                "Available space: " + (newShelf.getMaxCapacity() - currentLoad)
-                );
+                throw new ShelfCapacityExceededException(newShelf.getCode(), newShelf.getMaxCapacity() - currentLoad);
             }
         }
 
@@ -130,9 +127,7 @@ public class ProductService {
         int newQuantity = currentQuantity + quantityChange;
 
         if (newQuantity < 0) {
-            throw new RuntimeException(
-                    "Cannot reduce quantity below 0. Current: " + product.getQuantity()
-            );
+            throw new InvalidOperationException("Cannot reduce quantity below 0. Current: " + product.getQuantity());
         }
 
         product.setQuantity(newQuantity);
@@ -144,10 +139,8 @@ public class ProductService {
                 saved.getQuantity() <= saved.getReorderThreshold()) {
             // In a real system this would trigger a notification/task
             // For now we just log it
-            System.out.println("LOW STOCK ALERT: " + saved.getName() +
-                    " (SKU: " + saved.getSku() + ") quantity is " +
-                    saved.getQuantity() + " — reorder threshold: " +
-                    saved.getReorderThreshold());
+            log.warn("LOW STOCK ALERT: {} (SKU: {}) quantity is {} — reorder threshold: {}", saved.getName(),
+                    saved.getSku(), saved.getQuantity(), saved.getReorderThreshold());
         }
 
         return toDTO(saved);

@@ -3,6 +3,8 @@ package com.example.warehouse.service;
 import com.example.warehouse.dto.AisleDTO;
 import com.example.warehouse.entity.Aisle;
 import com.example.warehouse.entity.Hall;
+import com.example.warehouse.exception.DuplicateResourceException;
+import com.example.warehouse.exception.ResourceNotFoundException;
 import com.example.warehouse.repository.AisleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,9 +31,8 @@ public class AisleService {
         Hall hall = hallService.findById(hallId);
 
         if (aisleRepository.existsByHallIdAndName(hallId, aisle.getName())) {
-            throw new RuntimeException(
-                    "Aisle '" + aisle.getName() + "' already exists in this hall"
-            );
+            throw new DuplicateResourceException("Aisle '" + aisle.getName() + "' already exists in this hall");
+
         }
 
         aisle.setHall(hall);
@@ -43,7 +44,7 @@ public class AisleService {
 
     public Aisle findById(Long id) {
         return aisleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Aisle not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Aisle", id));
     }
 
     private AisleDTO toDTO(Aisle aisle) {

@@ -2,6 +2,7 @@ package com.example.warehouse;
 
 import com.example.warehouse.dto.HallDTO;
 import com.example.warehouse.entity.Hall;
+import com.example.warehouse.exception.ResourceNotFoundException;
 import com.example.warehouse.repository.HallRepository;
 import com.example.warehouse.service.HallService;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,8 +48,8 @@ class HallServiceTest {
         List<HallDTO> result = hallService.getAll();
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getName()).isEqualTo("Hall A");
-        assertThat(result.get(0).getAisleCount()).isEqualTo(0);
+        assertThat(result.getFirst().getName()).isEqualTo("Hall A");
+        assertThat(result.getFirst().getAisleCount()).isEqualTo(0);
     }
 
     @Test
@@ -62,14 +63,13 @@ class HallServiceTest {
     }
 
     @Test
-    void getById_nonExistingId_throwsException() {
+    void getById_nonExistingId_throwsResourceNotFoundException() {
         when(hallRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> hallService.getById(99L))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Hall not found");
     }
-
     @Test
     void create_savesAndReturnsHallDTO() {
         when(hallRepository.save(any(Hall.class))).thenReturn(hall);

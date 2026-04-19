@@ -2,6 +2,7 @@ package com.example.warehouse.service;
 
 import com.example.warehouse.dto.HallDTO;
 import com.example.warehouse.entity.Hall;
+import com.example.warehouse.exception.ResourceNotFoundException;
 import com.example.warehouse.repository.HallRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,7 @@ public class HallService {
     // Used internally by other services
     public Hall findById(Long id) {
         return hallRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Hall not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Hall", id));
     }
 
     private HallDTO toDTO(Hall hall) {

@@ -3,6 +3,8 @@ package com.example.warehouse.service;
 import com.example.warehouse.dto.ShelfDTO;
 import com.example.warehouse.entity.Aisle;
 import com.example.warehouse.entity.Shelf;
+import com.example.warehouse.exception.DuplicateResourceException;
+import com.example.warehouse.exception.ResourceNotFoundException;
 import com.example.warehouse.repository.ShelfRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,9 +31,8 @@ public class ShelfService {
         Aisle aisle = aisleService.findById(aisleId);
 
         if (shelfRepository.existsByAisleIdAndCode(aisleId, shelf.getCode())) {
-            throw new RuntimeException(
-                    "Shelf '" + shelf.getCode() + "' already exists in this aisle"
-            );
+            throw new DuplicateResourceException("Shelf '" + shelf.getCode() + "' already exists in this aisle");
+
         }
 
         shelf.setAisle(aisle);
@@ -44,7 +45,7 @@ public class ShelfService {
 
     public Shelf findById(Long id) {
         return shelfRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Shelf not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Shelf", id));
     }
 
     private ShelfDTO toDTO(Shelf shelf) {
