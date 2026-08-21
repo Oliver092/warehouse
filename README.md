@@ -4,7 +4,7 @@ A Spring Boot REST API for managing warehouse inventory with role-based access c
 
 ## Tech Stack
 
-- **Java 21** — virtual threads, modern language features
+- **Java 21** — modern language features
 - **Spring Boot 3.x** — REST API, Security, Data JPA
 - **PostgreSQL** — primary data store (via Spring Data JPA)
 - **Elasticsearch 8.12** — full-text and fuzzy product search, aggregations
@@ -46,14 +46,16 @@ The reindex endpoint rebuilds the entire index from Postgres on demand.
 
 ### Roles
 
-| Role | Access |
-|------|--------|
+| Role | Access                                                        |
+|------|---------------------------------------------------------------|
 | `ROLE_ADMIN` | Full access including hall/aisle/shelf management and reindex |
-| `ROLE_MANAGER` | Product management, low-stock view, statistics |
-| `ROLE_WORKER` | View products, update quantities, move products |
-| `ROLE_READONLY` | View and search only (e.g. forklift drivers) |
+| `ROLE_MANAGER` | Product management, low-stock view, statistics                |
+| `ROLE_WORKER` | View products, update quantities, move products               |
+| `ROLE_READONLY` | View and search only (e.g. office staff)                      |
 
 ## Getting Started
+cp .env.example .env
+# Fill in your values in .env
 
 ### Prerequisites
 - Java 21
@@ -118,6 +120,7 @@ Structure management is restricted to `ROLE_ADMIN`.
 # PostgreSQL
 spring.datasource.url=jdbc:postgresql://localhost:5432/warehouse_db
 spring.datasource.username=postgres
+spring.datasource.password=${DB_PASSWORD}
 
 # Elasticsearch
 spring.elasticsearch.uris=http://localhost:9200
