@@ -47,7 +47,7 @@ public class ProductService {
 
         // Check if shelf already has a different SKU
         if (!shelf.getProducts().isEmpty()) {
-            String existingSku = shelf.getProducts().get(0).getSku();
+            String existingSku = shelf.getProducts().getFirst().getSku();
             if (existingSku != null && !existingSku.equals(product.getSku())) {
                 throw new SkuConflictException(shelf.getCode(), existingSku);
             }
@@ -102,7 +102,7 @@ public class ProductService {
 
         // Check SKU conflict
         if (!newShelf.getProducts().isEmpty()) {
-            String existingSku = newShelf.getProducts().get(0).getSku();
+            String existingSku = newShelf.getProducts().getFirst().getSku();
             if (existingSku != null && !existingSku.equals(product.getSku())) {
                 throw new SkuConflictException(newShelf.getCode(), existingSku);
             }
